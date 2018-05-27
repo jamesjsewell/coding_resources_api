@@ -17,7 +17,7 @@ module.exports = {
     // object in an http response back to where the post request was initiated
     post: function (req, res, next) {
 
-        if(req.body.password == process.env.API_PASS) {
+        if(req.body.password && req.body.password == process.env.API_PASS) {
 
             // parsing the information contained in the body of the request that will be
             // applied ot the new record.
@@ -98,7 +98,7 @@ module.exports = {
         // the method takes an id and the new information that you want to be patched on the record
         // it then returns the result with either an error or the updated object
 
-        if(req.body.password == process.env.API_PASS) {
+        if(req.body.password && req.body.password == process.env.API_PASS) {
 
             Item.findByIdAndUpdate(
                 { _id: req.params.id },
@@ -119,7 +119,7 @@ module.exports = {
                         return errorHandler(req, res, message, err)
 
                     } else {
-                        
+
                         // sends the newly updated record over http request back to where the request was made
                         var message = "item updated"
                         return successHandler(req, res, message, results)
@@ -140,7 +140,7 @@ module.exports = {
         // in the http request parameters. If a record can be found that has the desired id, it will be removed
         // from the database collection
 
-        if(req.body.password == process.env.API_PASS) {
+        if(req.body.password && req.body.password == process.env.API_PASS) {
 
             Item.remove({ _id: req.params.id }, function (err) {
 
