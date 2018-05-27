@@ -17,31 +17,35 @@ module.exports = {
     // object in an http response back to where the post request was initiated
     post: function (req, res, next) {
 
-        // parsing the information contained in the body of the request that will be
-        // applied ot the new record.
-        const category = req.body.category,
-            title = req.body.title,
-            description = req.body.description,
-            link_href = req.body.link_href,
-            link_name = req.body.link_name
+        if(req.body.password == process.env.API_PASS) {
 
-        // 'Something' is an instance of the Item mongoose model class. It contains a method called save.
-        // the save method will take the mongoose model and save it to the database
-        var Something = new Item({ category: category, title: title, description: description, link_href: link_href, link_name: link_name })
-        Something.save(function (err, results) {
+            // parsing the information contained in the body of the request that will be
+            // applied ot the new record.
+            const category = req.body.category,
+                title = req.body.title,
+                description = req.body.description,
+                link_href = req.body.link_href,
+                link_name = req.body.link_name
 
-            // if there is an error, it will be sent over as an http response to the place where the request was initialized
-            if (err) {
-                var message = "server error, could not save item"
-                return errorHandler(req, res, message, err)
-                
+            // 'Something' is an instance of the Item mongoose model class. It contains a method called save.
+            // the save method will take the mongoose model and save it to the database
+            var Something = new Item({ category: category, title: title, description: description, link_href: link_href, link_name: link_name })
+            Something.save(function (err, results) {
 
-            }
+                // if there is an error, it will be sent over as an http response to the place where the request was initialized
+                if (err) {
+                    var message = "server error, could not save item"
+                    return errorHandler(req, res, message, err)
+                    
 
-            // the save was successful, the newly created record will be sent back in an http response to where the post request was initialized
-            var message = "saved item"
-            return successHandler(req, res, message, results)
-        })
+                }
+
+                // the save was successful, the newly created record will be sent back in an http response to where the post request was initialized
+                var message = "saved item"
+                return successHandler(req, res, message, results)
+            })
+
+        }
 
     },
 
@@ -55,7 +59,7 @@ module.exports = {
         // they will be used to filter for 'item' records 
         // that have matching parameters
         var queryObj = req.body
-     
+    
         if (req.params.id) {
             queryObj._id = req.params.id
 
@@ -76,7 +80,6 @@ module.exports = {
                 var message = "server error, item not found"
                 return errorHandler(req, res, message, err)
                 
-
             }
 
             //returns the results of the query over an http response to the entity where the http request was made
@@ -95,29 +98,37 @@ module.exports = {
         // the method takes an id and the new information that you want to be patched on the record
         // it then returns the result with either an error or the updated object
 
-        Item.findByIdAndUpdate(
-            { _id: req.params.id },
-            req.body,
-            { new: true},
-            function (err, results) {
-                if (err) {
-                    // if there was an error, this will send the error as an http response to the request that was made
-                    var message = "server error, could not update item"
-                    return errorHandler(req, res, message, err)
+        if(req.body.password == process.env.API_PASS) {
 
-                } else if (!results) {
-                    // if it could not find the record, sends an error message as a response over http back to where the request was made
-                    var message = "server error, item not found"
-                    return errorHandler(req, res, message, err)
+            Item.findByIdAndUpdate(
+                { _id: req.params.id },
+                req.body,
+                { new: true},
+                function (err, results) {
 
-                } else {
-                    // sends the newly updated record over http request back to where the request was made
-                    var message = "item updated"
-                    return successHandler(req, res, message, results)
+                    if (err) {
 
+                        // if there was an error, this will send the error as an http response to the request that was made
+                        var message = "server error, could not update item"
+                        return errorHandler(req, res, message, err)
+
+                    } else if (!results) {
+
+                        // if it could not find the record, sends an error message as a response over http back to where the request was made
+                        var message = "server error, item not found"
+                        return errorHandler(req, res, message, err)
+
+                    } else {
+                        
+                        // sends the newly updated record over http request back to where the request was made
+                        var message = "item updated"
+                        return successHandler(req, res, message, results)
+
+                    }
                 }
-            }
-        )
+            )
+
+        }
 
     },
 
@@ -129,20 +140,27 @@ module.exports = {
         // in the http request parameters. If a record can be found that has the desired id, it will be removed
         // from the database collection
 
-        Item.remove({ _id: req.params.id }, function (err) {
-            if (err) {
-                // if an error occures in the process of selecting or removing the record, the error will be sent
-                // back over an http response to where the http request was made
-                var message = "server error, could not remove item"
-                return errorHandler(req, res, message, err)
-                
-            }
+        if(req.body.password == process.env.API_PASS) {
 
-            // if the record was found and removed, a confirmation message will be sent back as an http response to where the request was made
-            var message = "item deleted"
-            //return successHandler(req, res, message)
-            return res.status(201).json({id: req.params.id})
-        })
+            Item.remove({ _id: req.params.id }, function (err) {
+
+                if (err) {
+
+                    // if an error occures in the process of selecting or removing the record, the error will be sent
+                    // back over an http response to where the http request was made
+                    var message = "server error, could not remove item"
+                    return errorHandler(req, res, message, err)
+                    
+                }
+
+                // if the record was found and removed, a confirmation message will be sent back as an http response to where the request was made
+                var message = "item deleted"
+                //return successHandler(req, res, message)
+                return res.status(201).json({id: req.params.id})
+
+            })
+
+        }
 
     }
 
